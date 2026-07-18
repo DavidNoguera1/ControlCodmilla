@@ -203,7 +203,7 @@ public class NoticiaService {
     private Optional<String> extraerFilename(String url) {
         if (url == null || url.isBlank()) return Optional.empty();
         if (url.contains("/archivos/")) {
-            String filename = url.substring(url.lastIndexOf("/") + 1);
+            String filename = url.substring(url.indexOf("/archivos/") + "/archivos/".length());
             if (!filename.isBlank()) return Optional.of(filename);
         }
         return Optional.empty();

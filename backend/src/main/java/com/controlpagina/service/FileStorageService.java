@@ -34,6 +34,10 @@ public class FileStorageService {
     }
 
     public String store(byte[] bytes, String originalFilename) {
+        return store(bytes, originalFilename, null);
+    }
+
+    public String store(byte[] bytes, String originalFilename, String subDir) {
         try {
             String extension = "";
             if (originalFilename != null && originalFilename.contains(".")) {
@@ -41,10 +45,15 @@ public class FileStorageService {
             }
             String filename = java.util.UUID.randomUUID().toString() + extension;
 
-            Path targetPath = uploadPath.resolve(filename).normalize();
+            Path targetDir = subDir != null && !subDir.isBlank()
+                    ? uploadPath.resolve(subDir).normalize()
+                    : uploadPath;
+            Files.createDirectories(targetDir);
+
+            Path targetPath = targetDir.resolve(filename).normalize();
             Files.write(targetPath, bytes);
 
-            return filename;
+            return subDir != null && !subDir.isBlank() ? subDir + "/" + filename : filename;
         } catch (Exception e) {
             throw new RuntimeException("No se pudo guardar el archivo: " + originalFilename, e);
         }
