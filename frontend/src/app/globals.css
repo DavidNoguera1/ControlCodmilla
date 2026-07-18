@@ -1,0 +1,251 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-quicksand);
+  --font-mono: var(--font-quicksand);
+
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  --color-brand-green: #026a37;
+  --color-brand-green-light: #76a53f;
+  --color-brand-gold: #e89721;
+  --color-brand-gold-light: #f0b84d;
+  --color-brand-dark: #0d1b12;
+  --color-brand-cream: #f4f2ec;
+  --color-brand-cream-dark: #eae6de;
+  --color-brand-text: #1a2e20;
+  --color-brand-text-muted: #5a7a62;
+  --color-brand-border: #ddd8ce;
+}
+
+:root {
+  --background: #f4f2ec;
+  --foreground: #1a2e20;
+  --card: oklch(1 0 0);
+  --card-foreground: #1a2e20;
+  --popover: oklch(1 0 0);
+  --popover-foreground: #1a2e20;
+  --primary: #026a37;
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: #e89721;
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: #eae6de;
+  --muted-foreground: #5a7a62;
+  --accent: #e89721;
+  --accent-foreground: #0d1b12;
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: #ddd8ce;
+  --input: #ddd8ce;
+  --ring: #026a37;
+  --chart-1: #026a37;
+  --chart-2: #76a53f;
+  --chart-3: #e89721;
+  --chart-4: #f0b84d;
+  --chart-5: #0d1b12;
+  --radius: 0.625rem;
+  --sidebar: #0d1b12;
+  --sidebar-foreground: #f4f2ec;
+  --sidebar-primary: #e89721;
+  --sidebar-primary-foreground: #0d1b12;
+  --sidebar-accent: #1a2e20;
+  --sidebar-accent-foreground: #f4f2ec;
+  --sidebar-border: #1a2e20;
+  --sidebar-ring: #e89721;
+}
+
+.dark {
+  --background: #0d1b12;
+  --foreground: #f4f2ec;
+  --card: #1a2e20;
+  --card-foreground: #f4f2ec;
+  --popover: #1a2e20;
+  --popover-foreground: #f4f2ec;
+  --primary: #76a53f;
+  --primary-foreground: #0d1b12;
+  --secondary: #f0b84d;
+  --secondary-foreground: #0d1b12;
+  --muted: #1a2e20;
+  --muted-foreground: #76a53f;
+  --accent: #f0b84d;
+  --accent-foreground: #0d1b12;
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: #1a2e20;
+  --input: #1a2e20;
+  --ring: #76a53f;
+  --chart-1: #76a53f;
+  --chart-2: #026a37;
+  --chart-3: #f0b84d;
+  --chart-4: #e89721;
+  --chart-5: #f4f2ec;
+  --sidebar: #0d1b12;
+  --sidebar-foreground: #f4f2ec;
+  --sidebar-primary: #e89721;
+  --sidebar-primary-foreground: #0d1b12;
+  --sidebar-accent: #1a2e20;
+  --sidebar-accent-foreground: #f4f2ec;
+  --sidebar-border: #1a2e20;
+  --sidebar-ring: #e89721;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+.editorjs-wrapper {
+  min-height: 300px;
+  position: relative;
+}
+
+.editorjs-wrapper .codex-editor {
+  position: static;
+}
+
+.editorjs-wrapper .codex-editor__toolbar {
+  z-index: 50;
+}
+
+.editorjs-wrapper .ce-toolbar__actions {
+  z-index: 50;
+}
+
+.editorjs-wrapper .codex-editor__redactor {
+  padding-bottom: 40px !important;
+}
+
+.editorjs-wrapper .ce-block__content {
+  max-width: 100%;
+}
+
+.editorjs-wrapper .ce-toolbar__content {
+  max-width: 100%;
+}
+
+.editorjs-wrapper .ce-header {
+  font-family: var(--font-quicksand);
+}
+
+.editorjs-wrapper h1.ce-header {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #0d1b12;
+}
+
+.editorjs-wrapper h2.ce-header {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #0d1b12;
+}
+
+.editorjs-wrapper h3.ce-header {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0d1b12;
+}
+
+.editorjs-wrapper .cdx-block {
+  font-family: var(--font-quicksand);
+  color: #1a2e20;
+}
+
+.editorjs-wrapper .ce-block--selected .ce-block__content {
+  background: rgba(2, 106, 55, 0.05);
+}
+
+.editorjs-wrapper .cdx-search-field {
+  border-color: #ddd8ce;
+}
+
+.editorjs-wrapper .cdx-button {
+  border-color: #ddd8ce;
+  color: #026a37;
+}
+
+.editorjs-wrapper .cdx-input {
+  border-color: #ddd8ce;
+}
+
+.editorjs-wrapper .ce-toolbar__settings-btn,
+.editorjs-wrapper .ce-toolbar__plus {
+  color: #026a37;
+}
+
+.editorjs-wrapper .cdx-settings-button--active {
+  background: rgba(2, 106, 55, 0.1);
+  color: #026a37;
+}
+
+.editorjs-wrapper .ce-inline-toolbar {
+  border-color: #ddd8ce;
+}
+
+.editorjs-wrapper .ce-conv-toolbar {
+  border-color: #ddd8ce;
+}
+
+.editorjs-wrapper .cdx-notifies {
+  z-index: 100;
+}
+
+.editorjs-wrapper .image-tool--withBackground .image-tool__image {
+  background: #f4f2ec;
+}
+
+.editorjs-wrapper .cdx-attaches {
+  border-color: #ddd8ce;
+  background: #f4f2ec;
+}
+
+.editorjs-wrapper .cdx-attaches__download-button {
+  color: #026a37;
+}
+
