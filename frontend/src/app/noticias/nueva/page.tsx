@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, ImagePlus, X, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Save, ImagePlus, X, Star } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,7 @@ export default function NuevaNoticiaPage() {
   const [titulo, setTitulo] = useState("");
   const [slug, setSlug] = useState("");
   const [activo, setActivo] = useState(true);
+  const [destacado, setDestacado] = useState(false);
   const [imagenPortada, setImagenPortada] = useState<string | null>(null);
   const [portadaPreview, setPortadaPreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -101,6 +102,7 @@ export default function NuevaNoticiaPage() {
         contenido: JSON.stringify(contenido),
         imagenPortada: portadaUrl || undefined,
         activo,
+        destacado,
       });
       toast.success("Noticia creada correctamente");
       router.push("/noticias");
@@ -216,6 +218,19 @@ export default function NuevaNoticiaPage() {
               <span className={`text-sm font-medium ${activo ? "text-brand-green" : "text-brand-text-muted"}`}>
                 {activo ? "Publicado" : "Borrador"}
               </span>
+              <button
+                type="button"
+                aria-pressed={destacado}
+                onClick={() => setDestacado(!destacado)}
+                className={`ml-2 inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-sm font-semibold transition-colors ${
+                  destacado
+                    ? "border-brand-gold/40 bg-brand-gold/15 text-brand-gold"
+                    : "border-brand-border bg-white text-brand-text-muted hover:text-brand-dark"
+                }`}
+              >
+                <Star className={`h-4 w-4 ${destacado ? "fill-current" : ""}`} />
+                Destacado
+              </button>
             </div>
             <div className="flex items-center gap-3">
               <Link href="/noticias">

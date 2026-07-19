@@ -35,7 +35,10 @@ public class PDFDocumentoController {
 
     @PostMapping
     public ResponseEntity<PDFDocumentoResponse> create(
-            @RequestParam("file") MultipartFile file) throws IOException {
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "nombre", required = false) String nombre,
+            @RequestParam(value = "orden", required = false) Integer orden,
+            @RequestParam(value = "activo", required = false) Boolean activo) throws IOException {
 
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().body(null);
@@ -46,10 +49,14 @@ public class PDFDocumentoController {
             return ResponseEntity.badRequest().body(null);
         }
 
-        String nombre = originalName.replaceAll("(?i)\\.pdf$", "");
+        String nombreDocumento = nombre != null && !nombre.isBlank()
+                ? nombre.trim()
+                : originalName.replaceAll("(?i)\\.pdf$", "");
 
         PDFDocumentoRequest request = new PDFDocumentoRequest();
-        request.setNombre(nombre);
+        request.setNombre(nombreDocumento);
+        request.setOrden(orden);
+        request.setActivo(activo);
 
         PDFDocumentoResponse response = pdfDocumentoService.create(
                 request, file.getBytes(), originalName);
@@ -72,6 +79,10 @@ public class PDFDocumentoController {
 
         byte[] fileBytes = file != null && !file.isEmpty() ? file.getBytes() : null;
         String originalFilename = file != null && !file.isEmpty() ? file.getOriginalFilename() : null;
+
+        if (originalFilename != null && !originalFilename.toLowerCase().endsWith(".pdf")) {
+            return ResponseEntity.badRequest().body(null);
+        }
 
         PDFDocumentoResponse response = pdfDocumentoService.update(id, request, fileBytes, originalFilename);
         return ResponseEntity.ok(response);

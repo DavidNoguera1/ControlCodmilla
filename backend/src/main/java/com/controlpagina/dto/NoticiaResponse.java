@@ -12,6 +12,7 @@ public class NoticiaResponse {
     private String imagenPortada;
     private String fechaPublicacion;
     private Boolean activo;
+    private Boolean destacado;
 
     public static NoticiaResponse fromEntity(Noticia noticia) {
         NoticiaResponse dto = new NoticiaResponse();
@@ -24,6 +25,7 @@ public class NoticiaResponse {
                 ? noticia.getFechaPublicacion().toString()
                 : null);
         dto.setActivo(noticia.getActivo());
+        dto.setDestacado(noticia.getDestacado());
         return dto;
     }
 
@@ -41,4 +43,6 @@ public class NoticiaResponse {
     public void setFechaPublicacion(String fechaPublicacion) { this.fechaPublicacion = fechaPublicacion; }
     public Boolean getActivo() { return activo; }
     public void setActivo(Boolean activo) { this.activo = activo; }
+    public Boolean getDestacado() { return destacado; }
+    public void setDestacado(Boolean destacado) { this.destacado = destacado; }
 }

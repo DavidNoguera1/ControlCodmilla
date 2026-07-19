@@ -49,6 +49,7 @@ public class NoticiaService {
         noticia.setContenido(request.getContenido());
         noticia.setImagenPortada(request.getImagenPortada());
         noticia.setActivo(request.getActivo() != null ? request.getActivo() : true);
+        noticia.setDestacado(request.getDestacado() != null ? request.getDestacado() : false);
         return NoticiaResponse.fromEntity(repository.save(noticia));
     }
 
@@ -68,6 +69,9 @@ public class NoticiaService {
         noticia.setImagenPortada(newPortada);
         if (request.getActivo() != null) {
             noticia.setActivo(request.getActivo());
+        }
+        if (request.getDestacado() != null) {
+            noticia.setDestacado(request.getDestacado());
         }
 
         limpiarArchivosHuérfanos(oldContenido, newContenido);

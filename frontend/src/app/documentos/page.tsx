@@ -167,7 +167,6 @@ export default function DocumentosPage() {
   );
 
   const fetchData = useCallback(async () => {
-    setLoading(true);
     try {
       const all = await pdfApi.list();
       setData(all);
@@ -179,7 +178,10 @@ export default function DocumentosPage() {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    const timer = window.setTimeout(() => {
+      fetchData();
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [fetchData]);
 
   const handleUpload = async () => {
@@ -224,6 +226,23 @@ export default function DocumentosPage() {
     setUploadFile(file);
     const nameSinExt = file.name.replace(/\.pdf$/i, "");
     setUploadNombre(nameSinExt);
+  };
+
+  const handleSelectEditFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setEditFile(null);
+      return;
+    }
+
+    if (!file.name.toLowerCase().endsWith(".pdf") && file.type !== "application/pdf") {
+      toast.error("Solo se permiten archivos PDF");
+      e.target.value = "";
+      setEditFile(null);
+      return;
+    }
+
+    setEditFile(file);
   };
 
   const handleEdit = async () => {
@@ -444,7 +463,7 @@ export default function DocumentosPage() {
                   id="edit-file"
                   type="file"
                   accept=".pdf"
-                  onChange={(e) => setEditFile(e.target.files?.[0] ?? null)}
+                  onChange={handleSelectEditFile}
                   className="border-brand-border"
                 />
                 {editFile && (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Newspaper, Plus, Search } from "lucide-react";
+import { Newspaper, Plus, Search, Star } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -72,10 +72,15 @@ export default function NoticiasPage() {
     const term = search.toLowerCase();
     const matchSearch =
       search === "" ||
-      [n.titulo, n.slug, n.fechaPublicacion].some((v) =>
+      [n.titulo, n.slug, n.fechaPublicacion, n.destacado ? "destacado" : ""].some((v) =>
         String(v || "").toLowerCase().includes(term)
       );
     return matchTab && matchSearch;
+  }).sort((a, b) => {
+    if ((a.destacado ?? false) !== (b.destacado ?? false)) {
+      return a.destacado ? -1 : 1;
+    }
+    return new Date(b.fechaPublicacion || 0).getTime() - new Date(a.fechaPublicacion || 0).getTime();
   });
 
   const handleDelete = async (slug: string) => {
@@ -193,6 +198,12 @@ export default function NoticiasPage() {
                 >
                   {item.activo ? "Activo" : "Inactivo"}
                 </Badge>
+                {item.destacado && (
+                  <Badge className="absolute right-3 top-3 bg-brand-gold text-white">
+                    <Star className="mr-1 h-3 w-3 fill-current" />
+                    Destacado
+                  </Badge>
+                )}
               </div>
 
               <div className="flex flex-1 flex-col p-4">

@@ -32,6 +32,7 @@ export interface Noticia {
   imagenPortada?: string;
   fechaPublicacion?: string;
   activo?: boolean;
+  destacado?: boolean;
 }
 
 export interface Carrusel {

@@ -15,6 +15,8 @@ public class NoticiaRequest {
 
     private Boolean activo;
 
+    private Boolean destacado;
+
     public String getTitulo() { return titulo; }
     public void setTitulo(String titulo) { this.titulo = titulo; }
     public String getSlug() { return slug; }
@@ -25,4 +27,6 @@ public class NoticiaRequest {
     public void setImagenPortada(String imagenPortada) { this.imagenPortada = imagenPortada; }
     public Boolean getActivo() { return activo; }
     public void setActivo(Boolean activo) { this.activo = activo; }
+    public Boolean getDestacado() { return destacado; }
+    public void setDestacado(Boolean destacado) { this.destacado = destacado; }
 }

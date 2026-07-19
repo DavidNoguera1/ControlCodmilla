@@ -8,9 +8,11 @@ CREATE TABLE noticias (
     imagen_portada VARCHAR(500),
     fecha_publicacion DATETIME,
     activo BOOLEAN NOT NULL DEFAULT TRUE,
+    destacado BOOLEAN NOT NULL DEFAULT FALSE,
     created_at DATETIME,
     updated_at DATETIME,
     INDEX idx_activo (activo),
+    INDEX idx_destacado (destacado),
     INDEX idx_slug (slug),
     INDEX idx_fecha_publicacion (fecha_publicacion)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, ImagePlus, X } from "lucide-react";
+import { ArrowLeft, Save, ImagePlus, X, Star } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
@@ -68,6 +68,7 @@ export default function EditarNoticiaPage({ params }: { params: Promise<{ slug: 
   const [titulo, setTitulo] = useState("");
   const [currentSlug, setCurrentSlug] = useState("");
   const [activo, setActivo] = useState(true);
+  const [destacado, setDestacado] = useState(false);
   const [imagenPortada, setImagenPortada] = useState<string | null>(null);
   const [portadaPreview, setPortadaPreview] = useState<string | null>(null);
   const [contenidoData, setContenidoData] = useState<OutputData | undefined>(undefined);
@@ -81,6 +82,7 @@ export default function EditarNoticiaPage({ params }: { params: Promise<{ slug: 
         setTitulo(noticia.titulo);
         setCurrentSlug(noticia.slug || slug);
         setActivo(noticia.activo ?? true);
+        setDestacado(noticia.destacado ?? false);
         setImagenPortada(noticia.imagenPortada || null);
         setPortadaPreview(resolveApiAssetUrl(noticia.imagenPortada));
 
@@ -157,6 +159,7 @@ export default function EditarNoticiaPage({ params }: { params: Promise<{ slug: 
         contenido: JSON.stringify(normalized),
         imagenPortada: toApiAssetPath(portadaUrl),
         activo,
+        destacado,
       });
       toast.success("Noticia actualizada correctamente");
       router.push("/noticias");
@@ -247,6 +250,19 @@ export default function EditarNoticiaPage({ params }: { params: Promise<{ slug: 
                   <span className={`text-sm font-semibold ${activo ? "text-brand-green" : "text-brand-text-muted"}`}>
                     {activo ? "Publicado" : "Borrador"}
                   </span>
+                  <button
+                    type="button"
+                    aria-pressed={destacado}
+                    onClick={() => setDestacado(!destacado)}
+                    className={`inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-sm font-semibold transition-colors ${
+                      destacado
+                        ? "border-brand-gold/40 bg-brand-gold/15 text-brand-gold"
+                        : "border-brand-border bg-white text-brand-text-muted hover:text-brand-dark"
+                    }`}
+                  >
+                    <Star className={`h-4 w-4 ${destacado ? "fill-current" : ""}`} />
+                    Destacado
+                  </button>
                 </div>
               </div>
             </div>

@@ -38,11 +38,14 @@ public class PDFDocumentoService {
     public PDFDocumentoResponse create(PDFDocumentoRequest request, byte[] fileBytes, String originalFilename) {
         int maxOrden = repository.findMaxOrden();
 
-        String rutaArchivo = fileStorageService.store(fileBytes, originalFilename, "archivosPDF");
+        String nombre = request.getNombre() != null && !request.getNombre().isBlank()
+                ? request.getNombre().trim()
+                : originalFilename.replaceAll("(?i)\\.pdf$", "");
+        String rutaArchivo = fileStorageService.storeWithName(fileBytes, nombre, originalFilename, "archivosPDF");
 
         PDFDocumento doc = new PDFDocumento();
-        doc.setNombre(request.getNombre());
-        doc.setNombreOriginal(originalFilename);
+        doc.setNombre(nombre);
+        doc.setNombreOriginal(filenameFromPath(rutaArchivo));
         doc.setRutaArchivo(rutaArchivo);
         doc.setOrden(request.getOrden() != null ? request.getOrden() : maxOrden + 1);
         doc.setActivo(request.getActivo() != null ? request.getActivo() : true);
@@ -55,15 +58,25 @@ public class PDFDocumentoService {
         PDFDocumento doc = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("PDF no encontrado con id: " + id));
 
+        String requestedName = request.getNombre() != null && !request.getNombre().isBlank()
+                ? request.getNombre().trim()
+                : doc.getNombre();
+
         if (fileBytes != null) {
-            fileStorageService.delete(doc.getRutaArchivo());
-            String rutaArchivo = fileStorageService.store(fileBytes, originalFilename, "archivosPDF");
+            String oldRutaArchivo = doc.getRutaArchivo();
+            String rutaArchivo = fileStorageService.storeWithName(fileBytes, requestedName, originalFilename, "archivosPDF");
             doc.setRutaArchivo(rutaArchivo);
-            doc.setNombreOriginal(originalFilename);
+            doc.setNombreOriginal(filenameFromPath(rutaArchivo));
+            fileStorageService.delete(oldRutaArchivo);
+        } else if (request.getNombre() != null && !request.getNombre().isBlank()
+                && !request.getNombre().trim().equals(doc.getNombre())) {
+            String rutaArchivo = fileStorageService.rename(doc.getRutaArchivo(), request.getNombre().trim());
+            doc.setRutaArchivo(rutaArchivo);
+            doc.setNombreOriginal(filenameFromPath(rutaArchivo));
         }
 
-        if (request.getNombre() != null) {
-            doc.setNombre(request.getNombre());
+        if (request.getNombre() != null && !request.getNombre().isBlank()) {
+            doc.setNombre(request.getNombre().trim());
         }
         if (request.getOrden() != null) {
             doc.setOrden(request.getOrden());
@@ -104,5 +117,11 @@ public class PDFDocumentoService {
                 .stream()
                 .map(PDFDocumentoResponse::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    private String filenameFromPath(String path) {
+        if (path == null) return null;
+        int slash = path.lastIndexOf("/");
+        return slash >= 0 ? path.substring(slash + 1) : path;
     }
 }
