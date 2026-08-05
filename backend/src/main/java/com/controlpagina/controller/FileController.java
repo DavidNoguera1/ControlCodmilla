@@ -59,6 +59,11 @@ public class FileController {
         return descargar("imagenesCarrusel/" + filename);
     }
 
+    @GetMapping("/imagenesTrabajadores/{filename:.+}")
+    public ResponseEntity<Resource> downloadTrabajadorImage(@PathVariable String filename) {
+        return descargar("imagenesTrabajadores/" + filename);
+    }
+
     @GetMapping("/{filename:.+}")
     public ResponseEntity<Resource> download(@PathVariable String filename) {
         return descargar(filename);

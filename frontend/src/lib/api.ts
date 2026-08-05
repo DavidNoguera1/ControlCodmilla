@@ -46,6 +46,20 @@ export interface Carrusel {
   updatedAt?: string;
 }
 
+export interface Trabajador {
+  id?: number;
+  codigoPublico: string;
+  primerNombre: string;
+  segundoNombre?: string;
+  primerApellido: string;
+  segundoApellido?: string;
+  nombreCompleto?: string;
+  fotoUrl: string;
+  activo?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     headers: { "Content-Type": "application/json", ...options?.headers },
@@ -90,6 +104,19 @@ export const carruselApi = {
       method: "PUT",
       body: JSON.stringify(ids),
     }),
+};
+
+export const trabajadoresApi = {
+  list: () => request<Trabajador[]>("/trabajadores"),
+  get: (id: number) => request<Trabajador>(`/trabajadores/${id}`),
+  getPublico: (codigoPublico: string) =>
+    request<Trabajador>(`/trabajadores/publico/${encodeURIComponent(codigoPublico.replace(/^#/, ""))}`),
+  create: (formData: FormData) =>
+    uploadRequest<Trabajador>("/trabajadores", formData),
+  update: (id: number, formData: FormData) =>
+    uploadPutRequest<Trabajador>(`/trabajadores/${id}`, formData),
+  delete: (id: number) =>
+    request<void>(`/trabajadores/${id}`, { method: "DELETE" }),
 };
 
 export interface PDFDocumento {

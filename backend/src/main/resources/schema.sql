@@ -46,3 +46,21 @@ CREATE TABLE carrusel (
     INDEX idx_orden (orden),
     INDEX idx_activo (activo)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS trabajadores;
+
+CREATE TABLE trabajadores (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    codigo_publico VARCHAR(80) NOT NULL UNIQUE,
+    primer_nombre VARCHAR(120) NOT NULL,
+    segundo_nombre VARCHAR(120),
+    primer_apellido VARCHAR(120) NOT NULL,
+    segundo_apellido VARCHAR(120),
+    foto_url VARCHAR(500) NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at DATETIME,
+    updated_at DATETIME,
+    INDEX idx_codigo_publico (codigo_publico),
+    INDEX idx_activo (activo),
+    INDEX idx_nombre (primer_apellido, primer_nombre)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

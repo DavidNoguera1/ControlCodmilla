@@ -11,6 +11,7 @@ import {
   Newspaper,
   Plus,
   Star,
+  Users,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,10 +20,12 @@ import {
   Carrusel,
   Noticia,
   PDFDocumento,
+  Trabajador,
   carruselApi,
   checkHealth,
   noticiasApi,
   pdfApi,
+  trabajadoresApi,
 } from "@/lib/api";
 
 function formatDate(date?: string) {
@@ -38,6 +41,7 @@ export default function Dashboard() {
   const [noticias, setNoticias] = useState<Noticia[]>([]);
   const [documentos, setDocumentos] = useState<PDFDocumento[]>([]);
   const [carrusel, setCarrusel] = useState<Carrusel[]>([]);
+  const [trabajadores, setTrabajadores] = useState<Trabajador[]>([]);
   const [online, setOnline] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -54,20 +58,23 @@ export default function Dashboard() {
         setNoticias([]);
         setDocumentos([]);
         setCarrusel([]);
+        setTrabajadores([]);
         setLoading(false);
         return;
       }
 
       try {
-        const [newsData, docsData, sliderData] = await Promise.all([
+        const [newsData, docsData, sliderData, trabajadoresData] = await Promise.all([
           noticiasApi.list(),
           pdfApi.list(),
           carruselApi.list(),
+          trabajadoresApi.list(),
         ]);
         if (!mounted) return;
         setNoticias(newsData);
         setDocumentos(docsData);
         setCarrusel(sliderData);
+        setTrabajadores(trabajadoresData);
       } catch {
         if (!mounted) return;
         setOnline(false);
@@ -88,6 +95,7 @@ export default function Dashboard() {
     const destacadas = noticias.filter((n) => n.destacado).length;
     const documentosActivos = documentos.filter((d) => d.activo !== false).length;
     const carruselActivo = carrusel.filter((c) => c.activo !== false).length;
+    const trabajadoresActivos = trabajadores.filter((t) => t.activo !== false).length;
 
     return [
       {
@@ -118,6 +126,15 @@ export default function Dashboard() {
         bg: "bg-brand-gold/10",
       },
       {
+        title: "Trabajadores",
+        value: trabajadores.length,
+        detail: `${trabajadoresActivos} activos`,
+        href: "/trabajadores",
+        icon: Users,
+        color: "text-brand-green-light",
+        bg: "bg-brand-green-light/10",
+      },
+      {
         title: "Carrusel",
         value: carrusel.length,
         detail: `${carruselActivo} visibles`,
@@ -127,7 +144,7 @@ export default function Dashboard() {
         bg: "bg-brand-green-light/10",
       },
     ];
-  }, [noticias, documentos, carrusel]);
+  }, [noticias, documentos, carrusel, trabajadores]);
 
   const latestNews = useMemo(
     () =>
@@ -249,6 +266,12 @@ export default function Dashboard() {
               <Button variant="outline" className="h-11 w-full justify-start border-brand-border">
                 <Images className="mr-2 h-4 w-4 text-brand-green-light" />
                 Editar carrusel
+              </Button>
+            </Link>
+            <Link href="/trabajadores">
+              <Button variant="outline" className="h-11 w-full justify-start border-brand-border">
+                <Users className="mr-2 h-4 w-4 text-brand-green-light" />
+                Gestionar trabajadores
               </Button>
             </Link>
           </div>
