@@ -1,8 +1,12 @@
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
+export const API_BASE = "/api/proxy";
+export const SPRING_API_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api").replace(
+  /\/+$/,
+  ""
+);
 
 const ABSOLUTE_URL_PATTERN = /^[a-z][a-z\d+\-.]*:/i;
-const API_BASE_CLEAN = API_BASE.replace(/\/+$/, "");
-const API_ROOT = API_BASE_CLEAN.replace(/\/api$/, "");
+const SPRING_CLEAN = SPRING_API_BASE;
+const API_ROOT = SPRING_CLEAN.replace(/\/api$/, "");
 
 function withoutApiPrefix(path: string): string {
   return path.startsWith("/api/") ? path.slice(4) : path;
@@ -12,13 +16,13 @@ export function resolveApiAssetUrl(url?: string | null): string {
   if (!url) return "";
   if (ABSOLUTE_URL_PATTERN.test(url)) return url;
   if (url.startsWith("/api/")) return `${API_ROOT}${url}`;
-  if (url.startsWith("/")) return `${API_BASE_CLEAN}${url}`;
-  return `${API_BASE_CLEAN}/${url}`;
+  if (url.startsWith("/")) return `${SPRING_CLEAN}${url}`;
+  return `${SPRING_CLEAN}/${url}`;
 }
 
 export function toApiAssetPath(url?: string | null): string | undefined {
   if (!url) return undefined;
-  if (url.startsWith(API_BASE_CLEAN)) return withoutApiPrefix(url.slice(API_ROOT.length));
+  if (url.startsWith(SPRING_CLEAN)) return withoutApiPrefix(url.slice(API_ROOT.length));
   if (url.startsWith(API_ROOT)) return withoutApiPrefix(url.slice(API_ROOT.length));
   if (url.startsWith("/")) return withoutApiPrefix(url);
   return url;
@@ -60,19 +64,39 @@ export interface Trabajador {
   updatedAt?: string;
 }
 
+async function parseError(res: Response): Promise<string> {
+  try {
+    const data = await res.json();
+    if (data?.error && typeof data.error === "string") return data.error;
+    if (data?.message && typeof data.message === "string") return data.message;
+  } catch {
+    // ignore
+  }
+  return `API error: ${res.status} ${res.statusText}`;
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     headers: { "Content-Type": "application/json", ...options?.headers },
+    credentials: "same-origin",
     ...options,
   });
-  if (!res.ok) throw new Error(`API error: ${res.status} ${res.statusText}`);
+  if (res.status === 401 && typeof window !== "undefined") {
+    await fetch("/api/auth/logout", { method: "POST" }).catch(() => undefined);
+    window.location.href = "/login";
+    throw new Error("No autorizado");
+  }
+  if (!res.ok) throw new Error(await parseError(res));
   if (res.status === 204) return undefined as T;
   return res.json();
 }
 
 export async function checkHealth(): Promise<boolean> {
   try {
-    const res = await fetch(`${API_BASE}/health`, { method: "GET", signal: AbortSignal.timeout(5000) });
+    const res = await fetch(`${SPRING_API_BASE}/health`, {
+      method: "GET",
+      signal: AbortSignal.timeout(5000),
+    });
     return res.ok;
   } catch {
     return false;
@@ -135,8 +159,14 @@ async function uploadRequest<T>(path: string, formData: FormData): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     method: "POST",
     body: formData,
+    credentials: "same-origin",
   });
-  if (!res.ok) throw new Error(`API error: ${res.status} ${res.statusText}`);
+  if (res.status === 401 && typeof window !== "undefined") {
+    await fetch("/api/auth/logout", { method: "POST" }).catch(() => undefined);
+    window.location.href = "/login";
+    throw new Error("No autorizado");
+  }
+  if (!res.ok) throw new Error(await parseError(res));
   return res.json();
 }
 
@@ -144,8 +174,14 @@ async function uploadPutRequest<T>(path: string, formData: FormData): Promise<T>
   const res = await fetch(`${API_BASE}${path}`, {
     method: "PUT",
     body: formData,
+    credentials: "same-origin",
   });
-  if (!res.ok) throw new Error(`API error: ${res.status} ${res.statusText}`);
+  if (res.status === 401 && typeof window !== "undefined") {
+    await fetch("/api/auth/logout", { method: "POST" }).catch(() => undefined);
+    window.location.href = "/login";
+    throw new Error("No autorizado");
+  }
+  if (!res.ok) throw new Error(await parseError(res));
   return res.json();
 }
 

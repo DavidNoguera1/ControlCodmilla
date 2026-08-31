@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/trabajadores")
@@ -40,7 +41,7 @@ public class TrabajadorController {
     }
 
     @PostMapping
-    public ResponseEntity<TrabajadorResponse> create(
+    public ResponseEntity<?> create(
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "codigoPublico", required = false) String codigoPublico,
             @RequestParam("primerNombre") String primerNombre,
@@ -49,21 +50,24 @@ public class TrabajadorController {
             @RequestParam(value = "segundoApellido", required = false) String segundoApellido,
             @RequestParam(value = "activo", required = false) Boolean activo) throws IOException {
 
-        if (file.isEmpty()) {
-            return ResponseEntity.badRequest().build();
+        if (file == null || file.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "La foto es obligatoria"));
         }
 
         TrabajadorRequest request = buildRequest(
                 codigoPublico, primerNombre, segundoNombre, primerApellido, segundoApellido, activo);
 
-        TrabajadorResponse response = trabajadorService.create(
-                request, file.getBytes(), file.getOriginalFilename());
-
-        return ResponseEntity.status(201).body(response);
+        try {
+            TrabajadorResponse response = trabajadorService.create(
+                    request, file.getBytes(), file.getOriginalFilename());
+            return ResponseEntity.status(201).body(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TrabajadorResponse> update(
+    public ResponseEntity<?> update(
             @PathVariable Long id,
             @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestParam(value = "codigoPublico", required = false) String codigoPublico,
@@ -79,8 +83,12 @@ public class TrabajadorController {
         byte[] fileBytes = file != null && !file.isEmpty() ? file.getBytes() : null;
         String originalFilename = file != null && !file.isEmpty() ? file.getOriginalFilename() : null;
 
-        TrabajadorResponse response = trabajadorService.update(id, request, fileBytes, originalFilename);
-        return ResponseEntity.ok(response);
+        try {
+            TrabajadorResponse response = trabajadorService.update(id, request, fileBytes, originalFilename);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     @DeleteMapping("/{id}")

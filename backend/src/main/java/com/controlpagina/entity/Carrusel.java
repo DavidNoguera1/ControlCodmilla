@@ -4,7 +4,12 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "carrusel")
+@Table(
+    name = "carrusel",
+    indexes = {
+        @Index(name = "idx_carrusel_activo_orden", columnList = "activo, orden")
+    }
+)
 public class Carrusel {
 
     @Id

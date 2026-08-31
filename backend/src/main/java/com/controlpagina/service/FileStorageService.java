@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.Normalizer;
+import java.util.UUID;
 
 @Service
 public class FileStorageService {
@@ -17,66 +18,73 @@ public class FileStorageService {
     @Value("${file.upload-dir:uploads}")
     private String uploadDir;
 
+    private final FileValidationService validationService;
     private Path uploadPath;
+
+    public FileStorageService(FileValidationService validationService) {
+        this.validationService = validationService;
+    }
 
     @jakarta.annotation.PostConstruct
     public void init() {
         uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
         try {
             Files.createDirectories(uploadPath);
+            for (String sub : FileValidationService.ALLOWED_SUBDIRS) {
+                Files.createDirectories(uploadPath.resolve(sub));
+            }
         } catch (Exception e) {
             throw new RuntimeException("No se pudo crear el directorio de uploads: " + uploadPath, e);
         }
     }
 
-    public String store(byte[] bytes, String originalFilename) {
-        return store(bytes, originalFilename, null);
-    }
-
     public String store(byte[] bytes, String originalFilename, String subDir) {
+        String safeSubDir = validationService.normalizeSubDir(subDir);
+        validationService.validate(bytes, originalFilename, safeSubDir);
+
         try {
-            String extension = "";
-            if (originalFilename != null && originalFilename.contains(".")) {
-                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-            }
-            String filename = java.util.UUID.randomUUID().toString() + extension;
+            String extension = extractExtension(originalFilename).toLowerCase();
+            String filename = UUID.randomUUID() + extension;
 
-            Path targetDir = subDir != null && !subDir.isBlank()
-                    ? uploadPath.resolve(subDir).normalize()
-                    : uploadPath;
-            Files.createDirectories(targetDir);
-
+            Path targetDir = resolveTargetDir(safeSubDir);
             Path targetPath = targetDir.resolve(filename).normalize();
+            ensureInside(targetPath, targetDir);
             Files.write(targetPath, bytes);
 
-            return subDir != null && !subDir.isBlank() ? subDir + "/" + filename : filename;
+            return safeSubDir + "/" + filename;
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (Exception e) {
-            throw new RuntimeException("No se pudo guardar el archivo: " + originalFilename, e);
+            throw new RuntimeException("No se pudo guardar el archivo", e);
         }
     }
 
     public String storeWithName(byte[] bytes, String desiredName, String originalFilename, String subDir) {
+        String safeSubDir = validationService.normalizeSubDir(subDir);
+        validationService.validate(bytes, originalFilename, safeSubDir);
+
         try {
             String extension = extractExtension(originalFilename);
             if (extension.isBlank()) {
                 extension = extractExtension(desiredName);
             }
+            extension = extension.toLowerCase();
 
             String baseName = sanitizeBaseName(stripExtension(
                     desiredName != null && !desiredName.isBlank() ? desiredName : originalFilename
             ));
 
-            Path targetDir = resolveTargetDir(subDir);
-            Files.createDirectories(targetDir);
-
+            Path targetDir = resolveTargetDir(safeSubDir);
             String filename = uniqueFilename(targetDir, baseName, extension, null);
             Path targetPath = targetDir.resolve(filename).normalize();
             ensureInside(targetPath, targetDir);
             Files.write(targetPath, bytes);
 
-            return subDir != null && !subDir.isBlank() ? subDir + "/" + filename : filename;
+            return safeSubDir + "/" + filename;
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (Exception e) {
-            throw new RuntimeException("No se pudo guardar el archivo: " + originalFilename, e);
+            throw new RuntimeException("No se pudo guardar el archivo", e);
         }
     }
 
@@ -86,8 +94,7 @@ public class FileStorageService {
                 return currentFilename;
             }
 
-            Path currentPath = uploadPath.resolve(currentFilename).normalize();
-            ensureInside(currentPath, uploadPath);
+            Path currentPath = resolveExisting(currentFilename);
 
             if (!Files.exists(currentPath)) {
                 throw new RuntimeException("No se pudo encontrar el archivo: " + currentFilename);
@@ -109,44 +116,68 @@ public class FileStorageService {
             Files.move(currentPath, targetPath);
             Path relative = uploadPath.relativize(targetPath);
             return relative.toString().replace('\\', '/');
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (Exception e) {
-            throw new RuntimeException("No se pudo renombrar el archivo: " + currentFilename, e);
+            throw new RuntimeException("No se pudo renombrar el archivo", e);
         }
     }
 
     public void delete(String filename) {
+        if (filename == null || filename.isBlank()) {
+            return;
+        }
         try {
-            Path filePath = uploadPath.resolve(filename).normalize();
+            Path filePath = resolveExisting(filename);
             Files.deleteIfExists(filePath);
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (Exception e) {
-            throw new RuntimeException("No se pudo eliminar el archivo: " + filename, e);
+            throw new RuntimeException("No se pudo eliminar el archivo", e);
         }
     }
 
     public Resource loadAsResource(String filename) {
         try {
-            Path filePath = uploadPath.resolve(filename).normalize();
+            Path filePath = resolveExisting(filename);
             Resource resource = new UrlResource(filePath.toUri());
             if (resource.exists() && resource.isReadable()) {
                 return resource;
             }
             throw new RuntimeException("No se pudo leer el archivo: " + filename);
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (MalformedURLException e) {
-            throw new RuntimeException("Error al leer el archivo: " + filename, e);
+            throw new RuntimeException("Error al leer el archivo", e);
         }
     }
 
+    private Path resolveExisting(String filename) {
+        if (filename == null || filename.isBlank()) {
+            throw new IllegalArgumentException("Nombre de archivo vacío");
+        }
+        String cleaned = filename.replace('\\', '/').trim();
+        if (cleaned.startsWith("/")) {
+            cleaned = cleaned.substring(1);
+        }
+        if (cleaned.contains("..")) {
+            throw new IllegalArgumentException("Ruta de archivo no permitida");
+        }
+
+        Path filePath = uploadPath.resolve(cleaned).normalize();
+        ensureInside(filePath, uploadPath);
+        return filePath;
+    }
+
     private Path resolveTargetDir(String subDir) {
-        Path targetDir = subDir != null && !subDir.isBlank()
-                ? uploadPath.resolve(subDir).normalize()
-                : uploadPath;
+        Path targetDir = uploadPath.resolve(subDir).normalize();
         ensureInside(targetDir, uploadPath);
         return targetDir;
     }
 
     private void ensureInside(Path path, Path parent) {
         if (!path.normalize().startsWith(parent.normalize())) {
-            throw new RuntimeException("Ruta de archivo no permitida: " + path);
+            throw new IllegalArgumentException("Ruta de archivo no permitida");
         }
     }
 
@@ -173,8 +204,7 @@ public class FileStorageService {
 
         String normalized = Normalizer.normalize(value, Normalizer.Form.NFD)
                 .replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
-        String safe = normalized
-                .replace('\\', '/');
+        String safe = normalized.replace('\\', '/');
         if (safe.contains("/")) {
             safe = safe.substring(safe.lastIndexOf("/") + 1);
         }

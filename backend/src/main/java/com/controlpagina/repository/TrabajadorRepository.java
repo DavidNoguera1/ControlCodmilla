@@ -7,6 +7,7 @@ import java.util.Optional;
 
 public interface TrabajadorRepository extends JpaRepository<Trabajador, Long> {
     List<Trabajador> findAllByOrderByPrimerApellidoAscPrimerNombreAsc();
+    List<Trabajador> findByActivoTrueOrderByPrimerApellidoAscPrimerNombreAsc();
     Optional<Trabajador> findByCodigoPublico(String codigoPublico);
     boolean existsByCodigoPublico(String codigoPublico);
     boolean existsByCodigoPublicoAndIdNot(String codigoPublico, Long id);

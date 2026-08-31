@@ -4,7 +4,12 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "pdf_documentos")
+@Table(
+    name = "pdf_documentos",
+    indexes = {
+        @Index(name = "idx_pdf_activo_orden", columnList = "activo, orden")
+    }
+)
 public class PDFDocumento {
 
     @Id

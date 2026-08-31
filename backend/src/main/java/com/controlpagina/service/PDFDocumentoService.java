@@ -30,6 +30,13 @@ public class PDFDocumentoService {
                 .collect(Collectors.toList());
     }
 
+    public List<PDFDocumentoResponse> findAllActivos() {
+        return repository.findByActivoTrueOrderByOrdenAsc()
+                .stream()
+                .map(PDFDocumentoResponse::fromEntity)
+                .collect(Collectors.toList());
+    }
+
     public Optional<PDFDocumentoResponse> findById(Long id) {
         return repository.findById(id).map(PDFDocumentoResponse::fromEntity);
     }

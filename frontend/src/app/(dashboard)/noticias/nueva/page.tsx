@@ -31,8 +31,10 @@ async function uploadFile(file: File, tipo?: string): Promise<string> {
   formData.append("file", file);
   if (tipo) formData.append("tipo", tipo);
   const res = await fetch(`${API_BASE}/archivos`, { method: "POST", body: formData });
-  const data = await res.json();
-  if (!data.success) throw new Error("Error al subir archivo");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.success) {
+    throw new Error(data?.error || "Error al subir archivo");
+  }
   return data.file.url;
 }
 
@@ -191,13 +193,18 @@ export default function NuevaNoticiaPage() {
 
         <div className="rounded-xl border border-brand-border bg-white shadow-sm">
           <div className="px-8 py-5 border-b border-brand-border/50 bg-brand-cream/20 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-brand-dark tracking-wide uppercase">Contenido</h2>
-            <span className="text-xs text-brand-text-muted">Editor enriquecido</span>
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-semibold text-brand-dark tracking-wide uppercase">Contenido</h2>
+            </div>
+            <span className="text-xs text-brand-text-muted bg-brand-cream px-2.5 py-1 rounded-md">Editor enriquecido</span>
           </div>
-          <div className="p-6">
-            <div className="rounded-lg border border-brand-border bg-white min-h-[500px]">
+          <div className="px-6 py-5">
+            <div className="rounded-lg border border-brand-border/60 bg-white min-h-[520px]">
               <EditorWrapper ref={editorRef} holder="editor-nueva" />
             </div>
+            <p className="mt-2 text-xs text-brand-text-muted">
+              Usa el botón <span className="font-semibold">+</span> para añadir bloques: párrafos, imágenes, encabezados, listas y más.
+            </p>
           </div>
           <div className="px-8 py-5 border-t border-brand-border/50 bg-brand-cream/20 flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-3">

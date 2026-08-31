@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Quicksand } from "next/font/google";
-import { Sidebar } from "@/components/Sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -29,12 +28,7 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${quicksand.variable} antialiased`}>
       <body>
-        <Sidebar />
-        <main className="lg:pl-64 min-h-screen">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-            {children}
-          </div>
-        </main>
+        {children}
         <Toaster richColors position="top-right" />
       </body>
     </html>

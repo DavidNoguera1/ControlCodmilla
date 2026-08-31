@@ -30,6 +30,13 @@ public class CarruselService {
                 .collect(Collectors.toList());
     }
 
+    public List<CarruselResponse> findAllActivos() {
+        return repository.findByActivoTrueOrderByOrdenAsc()
+                .stream()
+                .map(CarruselResponse::fromEntity)
+                .collect(Collectors.toList());
+    }
+
     public Optional<CarruselResponse> findById(Long id) {
         return repository.findById(id).map(CarruselResponse::fromEntity);
     }

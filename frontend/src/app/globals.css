@@ -141,37 +141,71 @@
   }
 }
 
+/* ============================
+   EditorJS — estilos globales
+   ============================ */
+
 .editorjs-wrapper {
   min-height: 300px;
   position: relative;
+  width: 100%;
+  /* NUNCA overflow hidden — corta el botón + y la toolbar */
+  overflow: visible;
 }
 
+/* Contenedor raíz del editor */
 .editorjs-wrapper .codex-editor {
-  position: static;
+  position: relative;
+  width: 100%;
+  overflow: visible;
 }
 
-.editorjs-wrapper .codex-editor__toolbar {
+/* Área editable — ocupa todo el ancho disponible.
+   El padding-left grande da espacio al botón + lateral. */
+.editorjs-wrapper .codex-editor__redactor {
+  padding-top: 16px !important;
+  padding-bottom: 60px !important;
+  padding-left: 60px !important;
+  padding-right: 20px !important;
+  box-sizing: border-box;
+}
+
+/* Bloques — ancho completo */
+.editorjs-wrapper .ce-block__content,
+.editorjs-wrapper .ce-toolbar__content {
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* -------- Toolbar (botón + y ajustes de bloque) -------- */
+.editorjs-wrapper .codex-editor__toolbar,
+.editorjs-wrapper .ce-toolbar {
   z-index: 50;
 }
 
 .editorjs-wrapper .ce-toolbar__actions {
   z-index: 50;
+  left: 0;
 }
 
-.editorjs-wrapper .codex-editor__redactor {
-  padding-bottom: 40px !important;
+/* Botón + y ajustes */
+.editorjs-wrapper .ce-toolbar__settings-btn,
+.editorjs-wrapper .ce-toolbar__plus {
+  color: #026a37;
+  border-radius: 6px;
+  transition: background 0.15s;
 }
 
-.editorjs-wrapper .ce-block__content {
-  max-width: 100%;
+.editorjs-wrapper .ce-toolbar__settings-btn:hover,
+.editorjs-wrapper .ce-toolbar__plus:hover {
+  background: rgba(2, 106, 55, 0.08);
 }
 
-.editorjs-wrapper .ce-toolbar__content {
-  max-width: 100%;
-}
-
+/* -------- Tipografía -------- */
 .editorjs-wrapper .ce-header {
   font-family: var(--font-quicksand);
+  line-height: 1.3;
+  margin-bottom: 0.25em;
 }
 
 .editorjs-wrapper h1.ce-header {
@@ -192,60 +226,205 @@
   color: #0d1b12;
 }
 
-.editorjs-wrapper .cdx-block {
-  font-family: var(--font-quicksand);
+.editorjs-wrapper h4.ce-header {
+  font-size: 1.1rem;
+  font-weight: 600;
   color: #1a2e20;
 }
 
-.editorjs-wrapper .ce-block--selected .ce-block__content {
-  background: rgba(2, 106, 55, 0.05);
+.editorjs-wrapper .cdx-block {
+  font-family: var(--font-quicksand);
+  color: #1a2e20;
+  line-height: 1.7;
 }
 
+/* -------- Selección de bloque -------- */
+.editorjs-wrapper .ce-block--selected .ce-block__content {
+  background: rgba(2, 106, 55, 0.05);
+  border-radius: 4px;
+}
+
+/* -------- Inputs y formularios internos -------- */
 .editorjs-wrapper .cdx-search-field {
   border-color: #ddd8ce;
+  border-radius: 6px;
 }
 
 .editorjs-wrapper .cdx-button {
   border-color: #ddd8ce;
   color: #026a37;
+  border-radius: 6px;
 }
 
 .editorjs-wrapper .cdx-input {
   border-color: #ddd8ce;
+  border-radius: 6px;
+  padding: 8px 12px;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.editorjs-wrapper .ce-toolbar__settings-btn,
-.editorjs-wrapper .ce-toolbar__plus {
-  color: #026a37;
+.editorjs-wrapper .cdx-input:focus {
+  border-color: #026a37;
+  box-shadow: 0 0 0 2px rgba(2, 106, 55, 0.12);
 }
 
+/* -------- Toolbar inline (negrita, cursiva, etc.) -------- */
+.editorjs-wrapper .ce-inline-toolbar {
+  border-color: #ddd8ce;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  z-index: 20;
+}
+
+.editorjs-wrapper .ce-conv-toolbar {
+  border-color: #ddd8ce;
+  border-radius: 8px;
+}
+
+/* -------- Settings activos -------- */
 .editorjs-wrapper .cdx-settings-button--active {
   background: rgba(2, 106, 55, 0.1);
   color: #026a37;
 }
 
-.editorjs-wrapper .ce-inline-toolbar {
-  border-color: #ddd8ce;
-}
-
-.editorjs-wrapper .ce-conv-toolbar {
-  border-color: #ddd8ce;
-}
-
+/* -------- Notificaciones -------- */
 .editorjs-wrapper .cdx-notifies {
   z-index: 100;
 }
 
-.editorjs-wrapper .image-tool--withBackground .image-tool__image {
-  background: #f4f2ec;
+/* -------- Imagen -------- */
+.editorjs-wrapper .image-tool {
+  width: 100%;
+  box-sizing: border-box;
 }
 
+.editorjs-wrapper .image-tool__image {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.editorjs-wrapper .image-tool__image-picture {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+}
+
+.editorjs-wrapper .image-tool--withBackground .image-tool__image {
+  background: #f4f2ec;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.editorjs-wrapper .image-tool__caption {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: #5a7a62;
+  text-align: center;
+  font-style: italic;
+  border: none !important;
+  outline: none !important;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* -------- Quote -------- */
+.editorjs-wrapper .cdx-quote {
+  border-left: 4px solid #026a37;
+  margin: 0;
+  padding-left: 16px;
+  background: rgba(2, 106, 55, 0.03);
+  border-radius: 0 6px 6px 0;
+}
+
+.editorjs-wrapper .cdx-quote__text {
+  font-size: 1.05rem;
+  font-style: italic;
+  color: #1a2e20;
+  min-height: 1.5em;
+}
+
+.editorjs-wrapper .cdx-quote__caption {
+  font-size: 0.85rem;
+  color: #5a7a62;
+}
+
+/* -------- Separador -------- */
+.editorjs-wrapper .ce-delimiter {
+  line-height: 1.6rem;
+  text-align: center;
+  color: #ddd8ce;
+  font-size: 1.4rem;
+  letter-spacing: 0.5em;
+  margin: 8px 0;
+}
+
+/* -------- Lista -------- */
+.editorjs-wrapper .cdx-list {
+  padding-left: 20px;
+  margin: 0;
+}
+
+.editorjs-wrapper .cdx-list__item {
+  padding: 2px 0;
+  line-height: 1.65;
+}
+
+/* -------- Checklist -------- */
+.editorjs-wrapper .cdx-checklist__item-checkbox {
+  border-color: #ddd8ce;
+  border-radius: 4px;
+}
+
+.editorjs-wrapper .cdx-checklist__item--checked .cdx-checklist__item-checkbox {
+  background: #026a37;
+  border-color: #026a37;
+}
+
+/* -------- Archivos adjuntos -------- */
 .editorjs-wrapper .cdx-attaches {
   border-color: #ddd8ce;
   background: #f4f2ec;
+  border-radius: 8px;
 }
 
 .editorjs-wrapper .cdx-attaches__download-button {
   color: #026a37;
+}
+
+/* -------- Popover (menú de herramientas) -------- */
+.editorjs-wrapper .ce-popover {
+  border-radius: 10px;
+  border-color: #ddd8ce;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  z-index: 20;
+}
+
+.editorjs-wrapper .ce-popover__item:hover {
+  background: rgba(2, 106, 55, 0.06);
+}
+
+.editorjs-wrapper .ce-popover__item--active {
+  background: rgba(2, 106, 55, 0.1);
+  color: #026a37;
+}
+
+.editorjs-wrapper .ce-popover-item__icon {
+  border-radius: 6px;
+  border-color: #ddd8ce;
+}
+
+/* -------- Inline code -------- */
+.editorjs-wrapper .ce-inline-tool--code,
+.editorjs-wrapper code {
+  background: rgba(2, 106, 55, 0.08);
+  color: #026a37;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.88em;
+  font-family: monospace;
 }
 

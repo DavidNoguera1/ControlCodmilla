@@ -1,6 +1,7 @@
 package com.controlpagina.controller;
 
 import com.controlpagina.service.FileStorageService;
+import com.controlpagina.service.FileValidationService;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -8,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.Files;
 import java.util.Map;
 
 @RestController
@@ -16,16 +16,18 @@ import java.util.Map;
 public class FileController {
 
     private final FileStorageService fileStorageService;
+    private final FileValidationService fileValidationService;
 
-    public FileController(FileStorageService fileStorageService) {
+    public FileController(FileStorageService fileStorageService, FileValidationService fileValidationService) {
         this.fileStorageService = fileStorageService;
+        this.fileValidationService = fileValidationService;
     }
 
     @PostMapping
     public ResponseEntity<Map<String, Object>> upload(
             @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "tipo", required = false) String tipo) {
-        if (file.isEmpty()) {
+            @RequestParam("tipo") String tipo) {
+        if (file == null || file.isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "error", "Archivo vacío"));
         }
 
@@ -37,9 +39,11 @@ public class FileController {
                     "success", true,
                     "file", Map.of("url", url, "name", filename)
             ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "error", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(Map.of(
-                    "success", false, "error", e.getMessage()
+                    "success", false, "error", "No se pudo guardar el archivo"
             ));
         }
     }
@@ -71,20 +75,14 @@ public class FileController {
 
     private ResponseEntity<Resource> descargar(String ruta) {
         Resource resource = fileStorageService.loadAsResource(ruta);
-        String contentType = "application/octet-stream";
-
-        try {
-            contentType = Files.probeContentType(
-                    java.nio.file.Paths.get(ruta)
-            );
-        } catch (Exception ignored) {
-        }
-
+        String contentType = fileValidationService.safeContentType(ruta);
         String nombreArchivo = ruta.contains("/") ? ruta.substring(ruta.lastIndexOf("/") + 1) : ruta;
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + nombreArchivo + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + nombreArchivo.replace("\"", "") + "\"")
+                .header(HttpHeaders.CACHE_CONTROL, "public, max-age=86400")
+                .header("X-Content-Type-Options", "nosniff")
                 .body(resource);
     }
 }

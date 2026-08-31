@@ -33,6 +33,18 @@ public class NoticiaService {
                 .collect(Collectors.toList());
     }
 
+    /** Solo noticias activas (consumo del sitio público). */
+    public List<NoticiaResponse> findAllActivas() {
+        return repository.findByActivoTrueOrderByFechaPublicacionDesc()
+                .stream()
+                .map(NoticiaResponse::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    public List<NoticiaResponse> findRecientesActivas(int limit) {
+        return findAllActivas().stream().limit(Math.max(1, limit)).collect(Collectors.toList());
+    }
+
     public Optional<NoticiaResponse> findById(Long id) {
         return repository.findById(id).map(NoticiaResponse::fromEntity);
     }

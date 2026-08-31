@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/carrusel")
@@ -33,14 +34,14 @@ public class CarruselController {
     }
 
     @PostMapping
-    public ResponseEntity<CarruselResponse> create(
+    public ResponseEntity<?> create(
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "titulo", required = false) String titulo,
             @RequestParam(value = "linkUrl", required = false) String linkUrl,
             @RequestParam(value = "activo", required = false) Boolean activo) throws IOException {
 
-        if (file.isEmpty()) {
-            return ResponseEntity.badRequest().build();
+        if (file == null || file.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Archivo vacío"));
         }
 
         CarruselRequest request = new CarruselRequest();
@@ -48,14 +49,17 @@ public class CarruselController {
         request.setLinkUrl(linkUrl);
         request.setActivo(activo);
 
-        CarruselResponse response = carruselService.create(
-                request, file.getBytes(), file.getOriginalFilename());
-
-        return ResponseEntity.status(201).body(response);
+        try {
+            CarruselResponse response = carruselService.create(
+                    request, file.getBytes(), file.getOriginalFilename());
+            return ResponseEntity.status(201).body(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CarruselResponse> update(
+    public ResponseEntity<?> update(
             @PathVariable Long id,
             @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestParam(value = "titulo", required = false) String titulo,
@@ -70,8 +74,12 @@ public class CarruselController {
         byte[] fileBytes = file != null && !file.isEmpty() ? file.getBytes() : null;
         String originalFilename = file != null && !file.isEmpty() ? file.getOriginalFilename() : null;
 
-        CarruselResponse response = carruselService.update(id, request, fileBytes, originalFilename);
-        return ResponseEntity.ok(response);
+        try {
+            CarruselResponse response = carruselService.update(id, request, fileBytes, originalFilename);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     @DeleteMapping("/{id}")

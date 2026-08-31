@@ -55,8 +55,10 @@ async function uploadFile(file: File, tipo?: string): Promise<string> {
   formData.append("file", file);
   if (tipo) formData.append("tipo", tipo);
   const res = await fetch(`${API_BASE}/archivos`, { method: "POST", body: formData });
-  const data = await res.json();
-  if (!data.success) throw new Error("Error al subir archivo");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.success) {
+    throw new Error(data?.error || "Error al subir archivo");
+  }
   return data.file.url;
 }
 
@@ -308,16 +310,19 @@ export default function EditarNoticiaPage({ params }: { params: Promise<{ slug: 
       <section className="rounded-lg border border-brand-border bg-white shadow-sm">
         <div className="flex items-center justify-between border-b border-brand-border/70 bg-brand-cream/30 px-5 py-4">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-brand-dark">Contenido</h2>
-          <span className="text-xs text-brand-text-muted">Editor enriquecido</span>
+          <span className="text-xs text-brand-text-muted bg-brand-cream px-2.5 py-1 rounded-md">Editor enriquecido</span>
         </div>
-        <div className="p-4 sm:p-5">
-          <div className="min-h-[520px] rounded-lg border border-brand-border bg-white px-3 sm:px-5">
+        <div className="px-5 py-5">
+          <div className="min-h-[520px] rounded-lg border border-brand-border/60 bg-white">
             {contenidoData ? (
               <EditorWrapper ref={editorRef} holder="editor-editar" data={contenidoData} />
             ) : (
               <EditorWrapper ref={editorRef} holder="editor-editar" />
             )}
           </div>
+          <p className="mt-2 text-xs text-brand-text-muted">
+            Usa el botón <span className="font-semibold">+</span> para añadir bloques: párrafos, imágenes, encabezados, listas y más.
+          </p>
         </div>
         <div className="flex flex-col gap-3 border-t border-brand-border/70 bg-brand-cream/30 px-5 py-4 sm:flex-row sm:items-center sm:justify-end">
           <Link href="/noticias" className="w-full sm:w-auto">

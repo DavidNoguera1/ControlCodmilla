@@ -1,7 +1,7 @@
 # ControlPagina
 
 Panel de control administrativo para la página web de **Coodmilla**.  
-Maneja un CRUD de Noticias, Documentos PDF (DIAN-ESAL) e Imágenes del carrusel.
+Maneja un CRUD de Noticias, Documentos PDF (DIAN-ESAL), Imágenes del carrusel y Trabajadores.
 
 ## Requisitos
 
@@ -12,19 +12,26 @@ Maneja un CRUD de Noticias, Documentos PDF (DIAN-ESAL) e Imágenes del carrusel.
 ## Backend (Spring Boot + Java)
 
 ```bash
-# 1. Asegúrate de tener MySQL corriendo con la base de datos:
+# 1. MySQL con la base:
 #    CREATE DATABASE PaginaCod;
 #
-# 2. Las credenciales por defecto son admin / admin
-#    (se pueden sobreescribir con DB_USER y DB_PASS)
+# 2. Credenciales DB por defecto: root / admin (sobrescribir con DB_USER / DB_PASS)
+# 3. Credenciales del panel CMS: ADMIN_USER / ADMIN_PASSWORD (ver .env.example)
 
 cd backend
-# Usa el wrapper (mvnw) — no requiere Maven instalado
 .\mvnw spring-boot:run
 ```
 
 El backend arranca en `http://localhost:8080`.  
-Los endpoints REST están bajo `/api/`.
+Los endpoints REST viven bajo `/api/`.
+
+### Seguridad API
+
+| Ruta | Auth |
+|------|------|
+| `GET /api/publico/**`, `GET /api/health`, `GET /archivos/**` | Pública |
+| `POST /api/auth/login` | Pública (valida credenciales) |
+| Resto del CRUD (`/api/noticias`, uploads, etc.) | HTTP Basic (`ADMIN_USER` / `ADMIN_PASSWORD`) |
 
 ## Frontend (Next.js + Tailwind + shadcn/ui)
 
@@ -34,11 +41,24 @@ pnpm install
 pnpm run dev
 ```
 
-El frontend arranca en `http://localhost:3000`.
+El panel arranca en `http://localhost:3001`.
 
-## Variables de entorno (Frontend)
+Ruta `/login`: pantalla de acceso. Tras autenticar, una cookie `httpOnly` guarda la sesión y el BFF (`/api/proxy/*`) reenvía las peticiones al backend con Basic Auth. El middleware protege todas las rutas del panel.
 
-Crea un archivo `.env.local` en `frontend/` si el backend corre en otro puerto:
+## Variables de entorno
+
+### Backend (`backend/.env.example`)
+
+```
+ADMIN_USER=admin
+ADMIN_PASSWORD=cambia-esta-clave-segura
+DB_URL=...
+DB_USER=...
+DB_PASS=...
+CORS_ORIGINS=http://localhost:3000,http://localhost:3001
+```
+
+### Frontend (`frontend/.env.local`)
 
 ```
 NEXT_PUBLIC_API_URL=http://localhost:8080/api
@@ -46,9 +66,13 @@ NEXT_PUBLIC_API_URL=http://localhost:8080/api
 
 ## Rutas del frontend
 
-| Ruta          | Descripción                    |
-| ------------- | ------------------------------ |
-| `/`           | Dashboard / inicio             |
-| `/noticias`   | CRUD de noticias               |
-| `/documentos` | CRUD de documentos DIAN-ESAL   |
-| `/carrusel`   | CRUD de imágenes del carrusel  |
+| Ruta | Descripción |
+|------|-------------|
+| `/login` | Inicio de sesión |
+| `/` | Dashboard |
+| `/noticias` | CRUD de noticias |
+| `/documentos` | CRUD de documentos DIAN-ESAL |
+| `/carrusel` | CRUD de imágenes del carrusel |
+| `/trabajadores` | CRUD de trabajadores |
+
+Ver también `DEPLOY.md` en la raíz del monorepo.

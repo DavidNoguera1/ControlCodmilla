@@ -34,7 +34,6 @@ public class HealthController {
             }
         } catch (Exception e) {
             body.put("database", "disconnected");
-            body.put("error", e.getMessage());
             body.put("status", "DOWN");
             return ResponseEntity.status(503).body(body);
         }

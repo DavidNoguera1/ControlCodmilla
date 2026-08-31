@@ -1,5 +1,6 @@
 package com.controlpagina.service;
 
+import com.controlpagina.dto.TrabajadorPublicoResponse;
 import com.controlpagina.dto.TrabajadorRequest;
 import com.controlpagina.dto.TrabajadorResponse;
 import com.controlpagina.entity.Trabajador;
@@ -27,6 +28,18 @@ public class TrabajadorService {
         return repository.findAllByOrderByPrimerApellidoAscPrimerNombreAsc()
                 .stream()
                 .map(TrabajadorResponse::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Consulta pública via QR.
+     * Devuelve únicamente los trabajadores activos, mapeados al DTO restringido
+     * que no expone IDs internos ni timestamps.
+     */
+    public List<TrabajadorPublicoResponse> findAllActivos() {
+        return repository.findByActivoTrueOrderByPrimerApellidoAscPrimerNombreAsc()
+                .stream()
+                .map(TrabajadorPublicoResponse::fromEntity)
                 .collect(Collectors.toList());
     }
 
